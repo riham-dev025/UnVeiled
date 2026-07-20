@@ -3,10 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import textstat
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-import time
+from transformers import pipeline
+
 
 app = FastAPI() #API IS ALL CAPITAL!!
 analyzer = SentimentIntensityAnalyzer()  #initializing the sentiment analyzer when server launches
+
+print("Waking up the NN")
+classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli") #initializing the zero-shot classifier when server launches
+print("The machine is awake now.")
 
 #to allow communication between react and fastapi
 #CHANGE THESE when i start in react and deploy
@@ -30,7 +35,7 @@ async def analyze_article(request: ArticleRequest): #request is the content in A
     if not text or len(text.strip()) == 0:
         return {
             "status": "error",
-            "message": "The ink was black. Please provide text."
+            "message": "The ink was blank. Please provide text."
         }
 #The NLP Engine
     reading_grade = textstat.flesch_kincaid_grade(text) #calculating reading grade/complexity
@@ -45,6 +50,20 @@ async def analyze_article(request: ArticleRequest): #request is the content in A
     else:
         primary_tone = "Neutral / Objective"
 
+    #deep learning section
+    manipulation_tactics = [
+        "fear appeal",
+        "sensationalism",
+        "logical and objective reporting",
+        "loaded language",
+        "appeal to authority"
+    ]
+    tactic_analysis = classifier(text,manipulation_tactics)
+    top_tactics = {
+        tactic_analysis['labels'][0]: f"{round(tactic_analysis['scores'][0] * 100, 1)}%",
+        tactic_analysis['labels'][1]: f"{round(tactic_analysis['scores'][1] * 100, 1)}%"
+    }
+
     return {
         "status": "success",
         "message": "The Occular Lens has extracted the metrics.",
@@ -58,7 +77,7 @@ async def analyze_article(request: ArticleRequest): #request is the content in A
                 "primary_tone": primary_tone,
                 "raw_scores": sentiment_score
             },
-            "persuasive_tactics": "Pending Model Integration (Phase 3)",
+            "persuasive_tactics": top_tactics,
             "missing_context": "Pending Search Engine (Phase 5)"
         }
     }
