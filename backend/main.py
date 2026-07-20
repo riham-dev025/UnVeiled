@@ -1,9 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import textstat
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import time
 
 app = FastAPI() #API IS ALL CAPITAL!!
+analyzer = SentimentIntensityAnalyzer()  #initializing the sentiment analyzer when server launches
 
 #to allow communication between react and fastapi
 #CHANGE THESE when i start in react and deploy
@@ -21,14 +24,42 @@ class ArticleRequest(BaseModel):
 
 @app.post("/api/analyze")
 async def analyze_article(request: ArticleRequest): #request is the content in ArticleRequest (to access content)
-    time.sleep(2)  #simulation for delay
-    return{
-        "status":"success",
-        "message":"The Occular Lens has processed the ink.",
-        "data":{
-            "input_recieved": request.content,
-            "credibility_score": 43,
-            "emotion_detected": "High",
-            "missing_context": "The cited study was performed on mice, not humans."
+    text = request.content
+
+    #checking is user submitted an empty input
+    if not text or len(text.strip()) == 0:
+        return {
+            "status": "error",
+            "message": "The ink was black. Please provide text."
+        }
+#The NLP Engine
+    reading_grade = textstat.flesch_kincaid_grade(text) #calculating reading grade/complexity
+    sentiment_score = analyzer.polarity_scores(text) #calculating sentiment score
+    compound_score = sentiment_score["compound"] #extracting compound score from sentiment score
+
+    #translating the score to human language
+    if compound_score >= 0.05:
+        primary_tone = "Positive"
+    elif compound_score <= -0.05:
+        primary_tone = "Negative / Critical / Fear-based"
+    else:
+        primary_tone = "Neutral / Objective"
+
+    return {
+        "status": "success",
+        "message": "The Occular Lens has extracted the metrics.",
+        "data": {
+            "text_preview": text[:50] + "..." if len(text) > 50 else text,
+            "readability": {
+                "grade_level": reading_grade,
+                "complexity": "High" if reading_grade > 12 else "Standard"
+            },
+            "emotional_profile": {
+                "primary_tone": primary_tone,
+                "raw_scores": sentiment_score
+            },
+            "persuasive_tactics": "Pending Model Integration (Phase 3)",
+            "missing_context": "Pending Search Engine (Phase 5)"
         }
     }
+    
