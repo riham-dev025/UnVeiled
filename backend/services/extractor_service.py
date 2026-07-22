@@ -9,7 +9,7 @@ def extract_from_url(url: str):
     if not downloaded:
         return {"error": "Could not access the URL. It may be blocked or invalid."}
     
-    article = trafilatura.extract(downloaded, output_format='json', with_metdata=True)
+    article = trafilatura.extract(downloaded, output_format='json', with_metadata=True)
 
     if not article:
         return {"error": "Couldnt not extract text from the webpage."}
