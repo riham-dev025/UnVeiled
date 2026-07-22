@@ -43,3 +43,29 @@ def extract_dossier_data(text: str):
             "persuasive_tactics": {"error": "The Machine failed to parse the text."},
             "error": str(e)
         }
+
+
+def analyze_missing_context(original_text: str, web_context: str) -> str:
+    """Cross-references the sensational article against live web search results."""
+    
+    prompt = f"""
+    You are TruthLens, an objective fact-checker. 
+    Compare the original article with the live web search results.
+    Write a concise, 2-3 sentence verdict. 
+    State whether the web context supports, debunks, or adds vital missing context to the original article.
+    Keep the tone clinical, objective, and neutral. Do not use markdown bolding.
+
+    Original Article: "{original_text}"
+    
+    Live Web Evidence:
+    "{web_context}"
+    """
+    
+    try:
+        response = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.1-8b-instant",
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        return f"The Lens was unable to process the web context: {str(e)}"
