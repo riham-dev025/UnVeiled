@@ -9,6 +9,8 @@ from services.nlp_service import get_readability_and_tone
 from services.llm_service import extract_dossier_data, analyze_missing_context
 from services.search_service import gather_web_context
 from services.extractor_service import extract_from_url, extract_from_pdf
+from services.nlp_service import get_readability_and_tone, estimate_synthetic_ink
+
 
 app = FastAPI()
 
@@ -22,10 +24,11 @@ app.add_middleware(
 
 def run_dossier_pipeline(text: str, metadata: dict):
     """Core analysis pipeline shared across raw text, URLs, and PDFs."""
-    # 1. Mathematical NLP (VADER & textstat)
+    # 1. Mathematical NLP
     nlp_data = get_readability_and_tone(text)
+    synthetic_metrics = estimate_synthetic_ink(text) # <--- ADD THIS LINE
     
-    # 2. Master Brain (Groq Llama 3.1)
+    # 2. Master Brain (Groq)
     dossier_data = extract_dossier_data(text)
     extracted_claims = dossier_data.get("extracted_claims", [])
 
@@ -45,10 +48,11 @@ def run_dossier_pipeline(text: str, metadata: dict):
             "text_preview": text[:100] + "..." if len(text) > 100 else text,
             "objective_summary": dossier_data.get("objective_summary"),
             "extracted_claims": extracted_claims,
-            "cited_authorities": dossier_data.get("cited_authorities", []),  # <--- THE MISSING LINK ADDED HERE
+            "cited_authorities": dossier_data.get("cited_authorities", []),
             "readability": nlp_data["readability"],
             "emotional_profile": nlp_data["emotional_profile"],
             "persuasive_tactics": dossier_data.get("persuasive_tactics"),
+            "synthetic_ink": synthetic_metrics, # <--- ADD THIS LINE
             "missing_context": missing_context
         }
     }

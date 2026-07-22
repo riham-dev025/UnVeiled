@@ -167,7 +167,8 @@ function App() {
               ))}
             </ul>
           </div>
-{/* CITED AUTHORITIES BOX */}
+
+          {/* CITED AUTHORITIES BOX */}
           {result.data.cited_authorities && result.data.cited_authorities.length > 0 && (
             <div style={styles.section}>
               <h3 style={styles.sectionTitle}>CITED AUTHORITIES & SOURCES</h3>
@@ -184,8 +185,9 @@ function App() {
             </div>
           )}
 
-          {/* Metrics & Tactics Grid */}
-          <div style={styles.grid}>
+          {/* Metrics, Tactics & Forensics Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            
             {/* Tone & Readability */}
             <div style={styles.card}>
               <h3 style={styles.cardHeader}>SYNTACTIC METRICS</h3>
@@ -194,16 +196,27 @@ function App() {
               <p><strong>Primary Tone:</strong> {result.data.emotional_profile.primary_tone}</p>
             </div>
 
+            {/* Synthetic Ink Forensics */}
+            {result.data.synthetic_ink && (
+              <div style={styles.card}>
+                <h3 style={styles.cardHeader}>SYNTHETIC INK DETECTOR</h3>
+                <p><strong>Verdict:</strong> {result.data.synthetic_ink.verdict}</p>
+                <p><strong>Burstiness (σ):</strong> {result.data.synthetic_ink.burstiness}</p>
+                <p><strong>Perplexity (H):</strong> {result.data.synthetic_ink.perplexity}</p>
+              </div>
+            )}
+
             {/* Persuasive Tactics */}
             <div style={styles.card}>
-              <h3 style={styles.cardHeader}>PERSUASIVE TACTICS DETECTED</h3>
-              {Object.entries(result.data.persuasive_tactics).map(([tactic, score], i) => (
+              <h3 style={styles.cardHeader}>PERSUASION DETECTED</h3>
+              {result.data.persuasive_tactics && Object.entries(result.data.persuasive_tactics).map(([tactic, score], i) => (
                 <div key={i} style={styles.tacticRow}>
-                  <span>{tactic}</span>
-                  <strong>{score}</strong>
+                  <span style={{ fontSize: '0.85rem' }}>{tactic}</span>
+                  <strong style={{ fontSize: '0.85rem' }}>{score}</strong>
                 </div>
               ))}
             </div>
+            
           </div>
         </main>
       )}
@@ -457,7 +470,6 @@ const styles = {
     letterSpacing: '1px',
     border: '1px solid #1a1a1a',
   }
-
 }
 
 export default App
