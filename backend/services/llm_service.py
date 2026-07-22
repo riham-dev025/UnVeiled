@@ -8,7 +8,7 @@ load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def extract_dossier_data(text: str):
-    """Uses Groq (Llama-3.1) to extract facts, summaries, AND persuasion tactics in one pass."""
+    """Uses Groq (Llama-3.1) to extract facts, summaries, authorities, and quote-backed persuasion analysis."""
     
     prompt = f"""
     You are TruthLens, an objective information analyst.
@@ -17,19 +17,24 @@ def extract_dossier_data(text: str):
     {{
       "objective_summary": "A calm, neutral 2-sentence summary removing emotional fluff.",
       "extracted_claims": ["claim 1", "claim 2", "claim 3"],
+      "cited_authorities": ["Expert/Organization 1", "Expert/Organization 2"],
       "persuasive_tactics": {{
-         "Top Tactic Name (e.g. Sensationalism)": "Percentage (e.g. 85%)",
-         "Second Tactic Name (e.g. Fear Appeal)": "Percentage (e.g. 60%)"
+         "Top Tactic Name": "Percentage% - Quote: 'exact sentence from text proving this tactic'",
+         "Second Tactic Name": "Percentage% - Quote: 'exact sentence from text proving this tactic'"
       }}
     }}
     
-    For persuasive_tactics, evaluate the text and assign a confidence percentage to the top two tactics present. 
-    Choose from: Fear Appeal, Sensationalism, Loaded Language, Logical Reporting, Appeal to Authority.
+    CRITICAL INSTRUCTIONS:
+    1. CITED AUTHORITIES: Extract the names of any experts, medical professionals, organizations, or studies cited in the text (e.g., CDC, FDA, Dr. Smith). If none, return an empty list [].
+    2. PERSUASIVE TACTICS: Evaluate for tactics like Fear Appeal, Sensationalism, Loaded Language, Logical Reporting.
+    - If the text is objective reporting, the top tactic MUST be "Logical Reporting".
+    - You MUST provide an exact quote from the text to justify EVERY score.
 
     Text: "{text}"
     """
     
     try:
+        import json
         response = client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
             model="llama-3.1-8b-instant",
@@ -40,6 +45,7 @@ def extract_dossier_data(text: str):
         return {
             "objective_summary": "Failed to extract data.",
             "extracted_claims": [],
+            "cited_authorities": [],
             "persuasive_tactics": {"error": "The Machine failed to parse the text."},
             "error": str(e)
         }

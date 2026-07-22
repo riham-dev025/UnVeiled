@@ -45,6 +45,7 @@ def run_dossier_pipeline(text: str, metadata: dict):
             "text_preview": text[:100] + "..." if len(text) > 100 else text,
             "objective_summary": dossier_data.get("objective_summary"),
             "extracted_claims": extracted_claims,
+            "cited_authorities": dossier_data.get("cited_authorities", []),  # <--- THE MISSING LINK ADDED HERE
             "readability": nlp_data["readability"],
             "emotional_profile": nlp_data["emotional_profile"],
             "persuasive_tactics": dossier_data.get("persuasive_tactics"),

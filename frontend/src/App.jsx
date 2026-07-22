@@ -167,6 +167,22 @@ function App() {
               ))}
             </ul>
           </div>
+{/* CITED AUTHORITIES BOX */}
+          {result.data.cited_authorities && result.data.cited_authorities.length > 0 && (
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>CITED AUTHORITIES & SOURCES</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+                {result.data.cited_authorities.map((authority, index) => (
+                  <span 
+                    key={index} 
+                    style={styles.authorityBadge}
+                  >
+                    {authority}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Metrics & Tactics Grid */}
           <div style={styles.grid}>
@@ -430,7 +446,18 @@ const styles = {
     backgroundColor: '#fee',
     border: '1px solid #fcc',
     color: '#900',
+  },
+  authorityBadge: {
+    backgroundColor: '#e2ddcd',
+    color: '#1a1a1a',
+    padding: '4px 10px',
+    fontSize: '0.8rem',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: '1px',
+    border: '1px solid #1a1a1a',
   }
+
 }
 
 export default App
