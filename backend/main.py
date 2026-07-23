@@ -4,12 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 
 # Import models & services
-from models import ArticleRequest
-from services.nlp_service import get_readability_and_tone
-from services.llm_service import extract_dossier_data, analyze_missing_context
-from services.search_service import gather_web_context
-from services.extractor_service import extract_from_url, extract_from_pdf
-from services.nlp_service import get_readability_and_tone, estimate_synthetic_ink
+from .models import ArticleRequest
+from .services.nlp_service import get_readability_and_tone
+from .services.llm_service import extract_dossier_data, analyze_missing_context
+from .services.search_service import gather_web_context
+from .services.extractor_service import extract_from_url, extract_from_pdf
+from .services.nlp_service import get_readability_and_tone, estimate_synthetic_ink
 
 
 app = FastAPI()
